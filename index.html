@@ -1,0 +1,1722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GridPilot — Professional CSV & Data Table Editor</title>
+<meta name="description" content="The CSV editor built for engineers. Opens any structured data file instantly. Multi-file sessions, macro recorder, formula engine, 3D plots. Free to try.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+/* ── Reset & Variables ─────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --navy:    #07111D;
+  --navy2:   #0D1B2A;
+  --navy3:   #162435;
+  --panel:   #0A1520;
+  --teal:    #00D4C8;
+  --teal2:   #00A896;
+  --teal-dim:#1A4A46;
+  --blue:    #2E75B6;
+  --blue-dim:#1A3A5C;
+  --white:   #F0F4F8;
+  --grey:    #8BA3B8;
+  --grey2:   #3A5A6A;
+  --red:     #E74C3C;
+  --amber:   #F7C47E;
+  --green:   #7ED89A;
+  --font-mono: 'Space Mono', monospace;
+  --font-body: 'DM Sans', sans-serif;
+  --font-display: 'Bebas Neue', sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--navy);
+  color: var(--white);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ── Grid background ───────────────────────────────────────────────────── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,212,200,.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,212,200,.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Typography ────────────────────────────────────────────────────────── */
+h1, h2, h3 { line-height: 1.1; }
+a { color: var(--teal); text-decoration: none; }
+a:hover { color: var(--white); }
+
+.mono { font-family: var(--font-mono); }
+
+/* ── Layout helpers ────────────────────────────────────────────────────── */
+.container {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 0 24px;
+  position: relative;
+  z-index: 1;
+}
+
+section { position: relative; z-index: 1; }
+
+/* ── NAV ───────────────────────────────────────────────────────────────── */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  background: rgba(7,17,29,.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(0,212,200,.12);
+}
+
+.nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--white);
+}
+
+.nav-logo .gp-mark {
+  display: grid;
+  grid-template-columns: repeat(5, 8px);
+  grid-template-rows: repeat(5, 8px);
+  gap: 1px;
+}
+
+.gp-mark .cell { border-radius: 1px; background: #162435; }
+.gp-mark .g    { background: #1A6080; }
+.gp-mark .pp   { background: var(--teal); }
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  list-style: none;
+}
+
+.nav-links a {
+  font-size: 14px;
+  color: var(--grey);
+  font-weight: 500;
+  letter-spacing: .02em;
+  transition: color .2s;
+}
+.nav-links a:hover { color: var(--white); }
+
+.btn-nav {
+  background: var(--teal);
+  color: var(--navy) !important;
+  padding: 8px 20px;
+  border-radius: 4px;
+  font-weight: 700 !important;
+  letter-spacing: .04em;
+  font-family: var(--font-mono);
+  font-size: 12px !important;
+  transition: background .2s, transform .15s;
+}
+.btn-nav:hover { background: var(--white) !important; transform: translateY(-1px); }
+
+/* ── HERO ──────────────────────────────────────────────────────────────── */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: 120px 0 80px;
+  overflow: hidden;
+}
+
+.hero-inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0,212,200,.08);
+  border: 1px solid rgba(0,212,200,.2);
+  border-radius: 3px;
+  padding: 6px 14px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--teal);
+  letter-spacing: .08em;
+  margin-bottom: 24px;
+}
+
+.hero-badge::before {
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--teal);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: .3; }
+}
+
+.hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(60px, 7vw, 96px);
+  letter-spacing: .02em;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.hero h1 span { color: var(--teal); }
+
+.hero-sub {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--grey);
+  letter-spacing: .12em;
+  margin-bottom: 24px;
+  text-transform: uppercase;
+}
+
+.hero-desc {
+  font-size: 18px;
+  color: #A0BCD0;
+  line-height: 1.7;
+  max-width: 480px;
+  margin-bottom: 40px;
+}
+
+.hero-desc strong { color: var(--white); font-weight: 600; }
+
+.hero-cta {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--teal);
+  color: var(--navy);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: .06em;
+  padding: 14px 28px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  transition: all .2s;
+}
+.btn-primary:hover {
+  background: var(--white);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,212,200,.3);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--grey);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: .06em;
+  padding: 14px 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  transition: color .2s;
+}
+.btn-secondary:hover { color: var(--white); }
+
+.hero-note {
+  margin-top: 16px;
+  font-size: 12px;
+  color: var(--grey2);
+  font-family: var(--font-mono);
+}
+
+/* ── FAKE TERMINAL / APP PREVIEW ───────────────────────────────────────── */
+.hero-visual {
+  position: relative;
+}
+
+.app-mockup {
+  background: var(--panel);
+  border: 1px solid rgba(0,212,200,.15);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(0,212,200,.06),
+    0 32px 80px rgba(0,0,0,.6),
+    0 0 80px rgba(0,212,200,.06);
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%,100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+
+.mockup-titlebar {
+  height: 32px;
+  background: #060E16;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  gap: 6px;
+  border-bottom: 1px solid rgba(0,212,200,.08);
+}
+
+.dot { width: 10px; height: 10px; border-radius: 50%; }
+.dot.r { background: #E74C3C; }
+.dot.y { background: #F7C47E; }
+.dot.g { background: #7ED89A; }
+
+.mockup-title {
+  margin-left: auto;
+  margin-right: auto;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--grey2);
+  letter-spacing: .06em;
+}
+
+.mockup-tabs {
+  display: flex;
+  background: #070F18;
+  border-bottom: 1px solid rgba(0,212,200,.08);
+}
+
+.mtab {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 6px 16px;
+  color: var(--grey2);
+  border-right: 1px solid rgba(255,255,255,.04);
+  cursor: pointer;
+}
+.mtab.active {
+  background: var(--panel);
+  color: var(--teal);
+  border-bottom: 2px solid var(--teal);
+  margin-bottom: -1px;
+}
+
+/* Mini spreadsheet */
+.mini-sheet {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  overflow: hidden;
+}
+
+.sheet-header {
+  display: grid;
+  grid-template-columns: 50px repeat(5, 1fr);
+  background: #060E16;
+  border-bottom: 1px solid rgba(0,212,200,.1);
+}
+
+.sheet-header div {
+  padding: 5px 8px;
+  color: var(--grey2);
+  border-right: 1px solid rgba(255,255,255,.04);
+  font-size: 9px;
+  letter-spacing: .06em;
+}
+
+.sheet-row {
+  display: grid;
+  grid-template-columns: 50px repeat(5, 1fr);
+  border-bottom: 1px solid rgba(255,255,255,.03);
+  transition: background .15s;
+}
+.sheet-row:hover { background: rgba(0,212,200,.04); }
+
+.sheet-row.selected { background: rgba(0,212,200,.08); }
+.sheet-row.highlighted { background: rgba(231,76,60,.1); }
+.sheet-row.highlighted2 { background: rgba(126,216,154,.08); }
+
+.sheet-cell {
+  padding: 5px 8px;
+  border-right: 1px solid rgba(255,255,255,.03);
+  color: #A0BCD0;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.sheet-cell.rn { color: var(--grey2); font-size: 9px; }
+.sheet-cell.hl-r { color: #F78FA0; }
+.sheet-cell.hl-g { color: var(--green); }
+.sheet-cell.hl-t { color: var(--teal); font-weight: 700; }
+.sheet-cell.hl-a { color: var(--amber); }
+
+.formula-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: #060E16;
+  border-top: 1px solid rgba(0,212,200,.08);
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+
+.formula-bar .cell-ref {
+  color: var(--teal);
+  min-width: 40px;
+  font-size: 9px;
+  border-right: 1px solid var(--grey2);
+  padding-right: 8px;
+}
+
+.formula-text { color: var(--amber); }
+
+/* Floating badge on mockup */
+.mockup-badge {
+  position: absolute;
+  background: var(--panel);
+  border: 1px solid rgba(0,212,200,.2);
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--teal);
+  box-shadow: 0 8px 32px rgba(0,0,0,.4);
+  animation: float 5s ease-in-out infinite;
+}
+
+.badge-1 {
+  top: -20px; right: -20px;
+  animation-delay: -2s;
+}
+.badge-2 {
+  bottom: 20px; left: -30px;
+  animation-delay: -3.5s;
+  color: var(--green);
+  border-color: rgba(126,216,154,.2);
+}
+
+/* ── SECTION HEADERS ───────────────────────────────────────────────────── */
+.section-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--teal);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.section-label::before {
+  content: '';
+  width: 24px;
+  height: 1px;
+  background: var(--teal);
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(36px, 4vw, 56px);
+  letter-spacing: .02em;
+  margin-bottom: 16px;
+}
+
+.section-title span { color: var(--teal); }
+
+.section-desc {
+  font-size: 17px;
+  color: #8BA3B8;
+  max-width: 540px;
+  line-height: 1.7;
+}
+
+/* ── LOGOS / SOCIAL PROOF ──────────────────────────────────────────────── */
+.proof {
+  padding: 40px 0;
+  border-top: 1px solid rgba(255,255,255,.05);
+  border-bottom: 1px solid rgba(255,255,255,.05);
+}
+
+.proof-inner {
+  display: flex;
+  align-items: center;
+  gap: 48px;
+  flex-wrap: wrap;
+}
+
+.proof-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--grey2);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.proof-logos {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
+.proof-logo {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--grey2);
+  opacity: .6;
+  letter-spacing: .06em;
+  transition: opacity .2s;
+}
+.proof-logo:hover { opacity: 1; }
+
+/* ── WHY SECTION ───────────────────────────────────────────────────────── */
+.why {
+  padding: 100px 0;
+}
+
+.why-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  margin-top: 64px;
+  border: 1px solid rgba(0,212,200,.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.why-card {
+  padding: 40px;
+  background: var(--navy2);
+  border: 1px solid transparent;
+  transition: all .3s;
+  position: relative;
+  overflow: hidden;
+}
+
+.why-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 3px;
+  height: 100%;
+  background: var(--teal);
+  opacity: 0;
+  transition: opacity .3s;
+}
+
+.why-card:hover { background: var(--navy3); border-color: rgba(0,212,200,.12); }
+.why-card:hover::before { opacity: 1; }
+
+.why-icon {
+  font-size: 28px;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.why-card h3 {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--teal);
+  letter-spacing: .06em;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+.why-card p {
+  font-size: 15px;
+  color: var(--grey);
+  line-height: 1.65;
+}
+
+.why-card strong { color: var(--white); font-weight: 500; }
+
+/* ── FEATURES ──────────────────────────────────────────────────────────── */
+.features {
+  padding: 100px 0;
+  background: linear-gradient(180deg, transparent, rgba(0,212,200,.02), transparent);
+}
+
+.features-tabs {
+  display: flex;
+  gap: 2px;
+  margin-top: 48px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+}
+
+.ftab {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .06em;
+  padding: 10px 20px;
+  border-radius: 3px;
+  background: var(--navy3);
+  color: var(--grey);
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all .2s;
+  text-transform: uppercase;
+}
+
+.ftab:hover { color: var(--white); border-color: rgba(0,212,200,.2); }
+.ftab.active {
+  background: rgba(0,212,200,.1);
+  color: var(--teal);
+  border-color: rgba(0,212,200,.3);
+}
+
+.feature-panels { min-height: 300px; }
+
+.fpanel { display: none; }
+.fpanel.active { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; }
+
+.fpanel-desc h3 {
+  font-family: var(--font-display);
+  font-size: 36px;
+  margin-bottom: 16px;
+  letter-spacing: .02em;
+}
+
+.fpanel-desc p {
+  color: var(--grey);
+  line-height: 1.7;
+  margin-bottom: 20px;
+}
+
+.fpanel-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fpanel-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 14px;
+  color: #A0BCD0;
+}
+
+.fpanel-list li::before {
+  content: '→';
+  color: var(--teal);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.fpanel-visual {
+  background: var(--panel);
+  border: 1px solid rgba(0,212,200,.12);
+  border-radius: 6px;
+  padding: 24px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.code-line {
+  display: flex;
+  gap: 16px;
+  padding: 3px 0;
+  color: var(--grey2);
+  border-bottom: 1px solid rgba(255,255,255,.03);
+}
+.code-line .ln { color: #2A4A5A; min-width: 20px; }
+.code-line .kw { color: #C586C0; }
+.code-line .fn { color: var(--teal); }
+.code-line .st { color: var(--amber); }
+.code-line .cm { color: #4A7A5A; }
+.code-line .va { color: #9CDCFE; }
+
+/* ── COMPARISON ────────────────────────────────────────────────────────── */
+.compare {
+  padding: 100px 0;
+}
+
+.compare-table {
+  margin-top: 64px;
+  border: 1px solid rgba(0,212,200,.12);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.ct-head {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  background: #060E16;
+  border-bottom: 1px solid rgba(0,212,200,.1);
+}
+
+.ct-head div {
+  padding: 16px 20px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--grey2);
+  border-right: 1px solid rgba(255,255,255,.04);
+}
+
+.ct-head .ours {
+  color: var(--teal);
+  background: rgba(0,212,200,.05);
+}
+
+.ct-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  border-bottom: 1px solid rgba(255,255,255,.04);
+  transition: background .15s;
+}
+.ct-row:hover { background: rgba(0,212,200,.03); }
+.ct-row:last-child { border-bottom: none; }
+
+.ct-cell {
+  padding: 14px 20px;
+  font-size: 14px;
+  color: var(--grey);
+  border-right: 1px solid rgba(255,255,255,.04);
+  display: flex;
+  align-items: center;
+}
+
+.ct-cell.feature { color: var(--white); font-size: 13px; font-weight: 500; }
+.ct-cell.ours { background: rgba(0,212,200,.03); justify-content: center; }
+
+.tick { color: var(--green); font-size: 16px; }
+.cross { color: var(--grey2); font-size: 16px; }
+.partial { color: var(--amber); font-size: 12px; font-family: var(--font-mono); }
+
+/* ── PRICING ───────────────────────────────────────────────────────────── */
+.pricing {
+  padding: 100px 0;
+  background: linear-gradient(180deg, transparent, rgba(0,212,200,.02), transparent);
+}
+
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  margin-top: 64px;
+}
+
+.price-card {
+  background: var(--navy2);
+  padding: 40px 32px;
+  border: 1px solid rgba(255,255,255,.06);
+  transition: all .3s;
+  position: relative;
+  border-radius: 4px;
+}
+
+.price-card:hover {
+  border-color: rgba(0,212,200,.2);
+  background: var(--navy3);
+  transform: translateY(-4px);
+}
+
+.price-card.featured {
+  border-color: rgba(0,212,200,.3);
+  background: rgba(0,212,200,.05);
+}
+
+.price-card.featured::before {
+  content: 'MOST POPULAR';
+  position: absolute;
+  top: -1px; left: 50%;
+  transform: translateX(-50%);
+  background: var(--teal);
+  color: var(--navy);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  padding: 4px 14px;
+  border-radius: 0 0 4px 4px;
+}
+
+.price-edition {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--teal);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+.price-amount {
+  font-family: var(--font-display);
+  font-size: 56px;
+  letter-spacing: .02em;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.price-amount .curr {
+  font-size: 24px;
+  vertical-align: top;
+  margin-top: 12px;
+  display: inline-block;
+  color: var(--grey);
+}
+
+.price-period {
+  font-size: 13px;
+  color: var(--grey2);
+  margin-bottom: 32px;
+  font-family: var(--font-mono);
+}
+
+.price-divider {
+  height: 1px;
+  background: rgba(255,255,255,.06);
+  margin-bottom: 24px;
+}
+
+.price-features {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 32px;
+}
+
+.price-features li {
+  font-size: 14px;
+  color: var(--grey);
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  line-height: 1.4;
+}
+
+.price-features li .icon { flex-shrink: 0; }
+.price-features li.locked { opacity: .4; }
+
+.btn-price {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  transition: all .2s;
+  text-transform: uppercase;
+}
+
+.btn-price.primary {
+  background: var(--teal);
+  color: var(--navy);
+}
+.btn-price.primary:hover { background: var(--white); transform: translateY(-1px); }
+
+.btn-price.outline {
+  background: transparent;
+  color: var(--grey);
+  border: 1px solid rgba(255,255,255,.12);
+}
+.btn-price.outline:hover { border-color: var(--teal); color: var(--teal); }
+
+/* ── TESTIMONIALS ──────────────────────────────────────────────────────── */
+.testimonials {
+  padding: 100px 0;
+}
+
+.testi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 64px;
+}
+
+.testi-card {
+  background: var(--navy2);
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 6px;
+  padding: 32px;
+  position: relative;
+  transition: all .3s;
+}
+.testi-card:hover {
+  border-color: rgba(0,212,200,.15);
+  transform: translateY(-3px);
+}
+
+.testi-quote {
+  font-family: var(--font-mono);
+  font-size: 32px;
+  color: var(--teal);
+  opacity: .3;
+  position: absolute;
+  top: 20px; right: 24px;
+  line-height: 1;
+}
+
+.testi-text {
+  font-size: 15px;
+  color: #A0BCD0;
+  line-height: 1.7;
+  margin-bottom: 24px;
+}
+
+.testi-author {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.testi-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.testi-name { font-size: 14px; font-weight: 600; color: var(--white); }
+.testi-role { font-size: 12px; color: var(--grey2); font-family: var(--font-mono); }
+
+/* ── CTA BANNER ────────────────────────────────────────────────────────── */
+.cta-banner {
+  padding: 100px 0;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.cta-banner::before {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  width: 600px; height: 300px;
+  background: radial-gradient(ellipse, rgba(0,212,200,.08), transparent 70%);
+  pointer-events: none;
+}
+
+.cta-banner h2 {
+  font-family: var(--font-display);
+  font-size: clamp(42px, 5vw, 72px);
+  margin-bottom: 20px;
+  letter-spacing: .02em;
+  position: relative;
+}
+
+.cta-banner p {
+  font-size: 18px;
+  color: var(--grey);
+  max-width: 500px;
+  margin: 0 auto 40px;
+}
+
+.cta-actions {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* ── FOOTER ────────────────────────────────────────────────────────────── */
+footer {
+  border-top: 1px solid rgba(255,255,255,.06);
+  padding: 60px 0 40px;
+}
+
+.footer-inner {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 40px;
+  margin-bottom: 48px;
+}
+
+.footer-brand p {
+  font-size: 14px;
+  color: var(--grey2);
+  line-height: 1.6;
+  margin-top: 12px;
+  max-width: 260px;
+}
+
+.footer-col h4 {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .1em;
+  color: var(--grey2);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.footer-col ul li a { font-size: 14px; color: var(--grey2); transition: color .2s; }
+.footer-col ul li a:hover { color: var(--teal); }
+
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255,255,255,.04);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--grey2);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* ── SHORTCUTS STRIP ───────────────────────────────────────────────────── */
+.shortcuts-strip {
+  padding: 60px 0;
+  border-top: 1px solid rgba(255,255,255,.05);
+  border-bottom: 1px solid rgba(255,255,255,.05);
+}
+
+.shortcuts-inner {
+  display: flex;
+  gap: 32px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+.shortcuts-inner::-webkit-scrollbar { display: none; }
+
+.shortcut-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+}
+
+.kbd {
+  background: var(--navy3);
+  border: 1px solid rgba(255,255,255,.1);
+  border-bottom: 2px solid rgba(0,212,200,.3);
+  border-radius: 4px;
+  padding: 3px 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--teal);
+  letter-spacing: .04em;
+}
+
+.shortcut-item span {
+  font-size: 13px;
+  color: var(--grey);
+}
+
+/* ── ANIMATIONS ────────────────────────────────────────────────────────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity .6s ease, transform .6s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── RESPONSIVE ────────────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .hero-inner { grid-template-columns: 1fr; }
+  .hero-visual { display: none; }
+  .why-grid { grid-template-columns: 1fr; }
+  .fpanel.active { grid-template-columns: 1fr; }
+  .ct-head, .ct-row { grid-template-columns: 1fr 1fr 1fr; }
+  .ct-cell:last-child { display: none; }
+  .pricing-grid { grid-template-columns: 1fr; }
+  .testi-grid { grid-template-columns: 1fr; }
+  .footer-inner { grid-template-columns: 1fr 1fr; }
+  .nav-links { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── NAV ─────────────────────────────────────────────────────────────── -->
+<nav>
+  <div class="nav-inner">
+    <div class="nav-logo">
+      <div class="gp-mark">
+        <!-- Row 0 -->
+        <div class="cell g"></div><div class="cell g"></div><div class="cell g"></div><div class="cell pp"></div><div class="cell pp"></div>
+        <!-- Row 1 -->
+        <div class="cell g"></div><div class="cell"></div><div class="cell"></div><div class="cell pp"></div><div class="cell pp"></div>
+        <!-- Row 2 -->
+        <div class="cell g"></div><div class="cell"></div><div class="cell g"></div><div class="cell pp"></div><div class="cell pp"></div>
+        <!-- Row 3 -->
+        <div class="cell g"></div><div class="cell"></div><div class="cell g"></div><div class="cell pp"></div><div class="cell"></div>
+        <!-- Row 4 -->
+        <div class="cell g"></div><div class="cell g"></div><div class="cell g"></div><div class="cell pp"></div><div class="cell"></div>
+      </div>
+      GridPilot
+    </div>
+    <ul class="nav-links">
+      <li><a href="#why">Why</a></li>
+      <li><a href="#features">Features</a></li>
+      <li><a href="#compare">Compare</a></li>
+      <li><a href="#pricing">Pricing</a></li>
+      <li><a href="#" class="btn-nav">⬇ Download Free</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ── HERO ─────────────────────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-inner">
+      <div class="hero-content">
+        <div class="hero-badge">v1.0 — Now available for Windows</div>
+        <div class="hero-sub">Professional CSV & Data Table Editor</div>
+        <h1>Grid<span>Pilot</span></h1>
+        <p class="hero-desc">
+          The CSV editor built for <strong>engineers and analysts</strong> who open structured data files dozens of times a day. Opens in <strong>under a second</strong>. Handles files Excel crashes on.
+        </p>
+        <div class="hero-cta">
+          <a href="#" class="btn-primary">⬇ Download Free — Windows</a>
+          <a href="#features" class="btn-secondary">See all features →</a>
+        </div>
+        <p class="hero-note mono">Free forever for core features · No account required · 30-day trial of Pro</p>
+      </div>
+
+      <div class="hero-visual">
+        <div class="mockup-badge badge-1">✓ Score: 240 — macro played 48×</div>
+        <div class="mockup-badge badge-2">⬤ 14 / 847 rows matched</div>
+
+        <div class="app-mockup">
+          <div class="mockup-titlebar">
+            <div class="dot r"></div>
+            <div class="dot y"></div>
+            <div class="dot g"></div>
+            <div class="mockup-title">GridPilot — load_cases_v3.csv</div>
+          </div>
+          <div class="mockup-tabs">
+            <div class="mtab active">load_cases_v3.csv</div>
+            <div class="mtab">sensors_2024.tsv ●</div>
+            <div class="mtab">MDT_catalogue.dat</div>
+          </div>
+          <div class="formula-bar">
+            <span class="cell-ref">D4</span>
+            <span class="formula-text">=VLOOKUP(A4, $RefTable.$A:$D, 3, 0)</span>
+          </div>
+          <div class="mini-sheet">
+            <div class="sheet-header">
+              <div></div>
+              <div>Component</div>
+              <div>Load_kN</div>
+              <div>FEA_Stress</div>
+              <div>Status</div>
+              <div>Δ_ref</div>
+            </div>
+            <div class="sheet-row">
+              <div class="sheet-cell rn">1</div>
+              <div class="sheet-cell hl-t">MB_001</div>
+              <div class="sheet-cell">250.5</div>
+              <div class="sheet-cell">1200.3</div>
+              <div class="sheet-cell hl-g">OK</div>
+              <div class="sheet-cell">+2.1%</div>
+            </div>
+            <div class="sheet-row selected">
+              <div class="sheet-cell rn">2</div>
+              <div class="sheet-cell hl-t">MB_002</div>
+              <div class="sheet-cell">180.2</div>
+              <div class="sheet-cell hl-a">=VLOOKUP(A4…</div>
+              <div class="sheet-cell hl-a">WARN</div>
+              <div class="sheet-cell">-0.8%</div>
+            </div>
+            <div class="sheet-row highlighted">
+              <div class="sheet-cell rn">3</div>
+              <div class="sheet-cell hl-t">BRG_001</div>
+              <div class="sheet-cell hl-r">3500.2</div>
+              <div class="sheet-cell hl-r">EXCEED</div>
+              <div class="sheet-cell hl-r">ERR</div>
+              <div class="sheet-cell hl-r">+18.4%</div>
+            </div>
+            <div class="sheet-row">
+              <div class="sheet-cell rn">4</div>
+              <div class="sheet-cell hl-t">HUB_001</div>
+              <div class="sheet-cell">92.0</div>
+              <div class="sheet-cell">748.9</div>
+              <div class="sheet-cell hl-g">OK</div>
+              <div class="sheet-cell">+0.3%</div>
+            </div>
+            <div class="sheet-row highlighted2">
+              <div class="sheet-cell rn">5</div>
+              <div class="sheet-cell hl-t">HUB_002</div>
+              <div class="sheet-cell hl-g">91.8</div>
+              <div class="sheet-cell hl-g">740.1</div>
+              <div class="sheet-cell hl-g">OK</div>
+              <div class="sheet-cell hl-g">-1.1%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SHORTCUTS ────────────────────────────────────────────────────────── -->
+<div class="shortcuts-strip">
+  <div class="container">
+    <div class="shortcuts-inner">
+      <div class="shortcut-item"><span class="kbd">Ctrl+O</span><span>Open file</span></div>
+      <div class="shortcut-item"><span class="kbd">Ctrl+F</span><span>Live filter</span></div>
+      <div class="shortcut-item"><span class="kbd">Ctrl+R</span><span>Autofill</span></div>
+      <div class="shortcut-item"><span class="kbd">F9</span><span>Record macro</span></div>
+      <div class="shortcut-item"><span class="kbd">F10</span><span>Play macro</span></div>
+      <div class="shortcut-item"><span class="kbd">Ctrl+Shift+P</span><span>Pivot table</span></div>
+      <div class="shortcut-item"><span class="kbd">Ctrl+Shift+L</span><span>Plot window</span></div>
+      <div class="shortcut-item"><span class="kbd">Ctrl+P</span><span>Command palette</span></div>
+      <div class="shortcut-item"><span class="kbd">Ctrl+T</span><span>Text view</span></div>
+      <div class="shortcut-item"><span class="kbd">Ctrl+I</span><span>Column inspector</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── WHY ──────────────────────────────────────────────────────────────── -->
+<section class="why" id="why">
+  <div class="container">
+    <div class="section-label reveal">Why GridPilot</div>
+    <h2 class="section-title reveal">Built for the file you <span>actually</span> work with</h2>
+    <p class="section-desc reveal">Not a spreadsheet. Not a text editor. The tool that lives between them — purpose-built for structured data files.</p>
+
+    <div class="why-grid reveal">
+      <div class="why-card">
+        <span class="why-icon">⚡</span>
+        <h3>Opens in &lt;1 second</h3>
+        <p>A 200k-row CSV opens instantly. <strong>Excel takes 8–12 seconds</strong> for the same file and sometimes crashes. GridPilot never locks the file on disk.</p>
+      </div>
+      <div class="why-card">
+        <span class="why-icon">📂</span>
+        <h3>Multi-file sessions</h3>
+        <p>Open your load case file, sensor catalogue, and reference table simultaneously. <strong>Each tab is fully independent</strong> — separate undo history, separator, and formatting rules.</p>
+      </div>
+      <div class="why-card">
+        <span class="why-icon">🔍</span>
+        <h3>Filter that actually edits</h3>
+        <p>Filter to 14 matching rows and <strong>edit them directly</strong>. Changes write back to the correct rows in the full dataset. Clear the filter — every edit is there.</p>
+      </div>
+      <div class="why-card">
+        <span class="why-icon">🎯</span>
+        <h3>Knows your formats</h3>
+        <p>Auto-detects comma, tab, semicolon, pipe, space, and <strong>#label custom formats</strong> used in FEA and MDT parameter files. No manual separator selection on every open.</p>
+      </div>
+      <div class="why-card">
+        <span class="why-icon">🔌</span>
+        <h3>Python plugins in 10 lines</h3>
+        <p>Write a Python function, save it, click Reload. It appears in the Plugins menu instantly. <strong>Full pandas access</strong> — unit conversions, custom exports, validation, batch rename.</p>
+      </div>
+      <div class="why-card">
+        <span class="why-icon">🎥</span>
+        <h3>Notepad++ style macros</h3>
+        <p>Record any sequence of actions — navigation, typed values, paste, operations. Run it <strong>50 times to process 50 rows</strong>. Each pass starts where the previous ended.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FEATURES ─────────────────────────────────────────────────────────── -->
+<section class="features" id="features">
+  <div class="container">
+    <div class="section-label reveal">Features</div>
+    <h2 class="section-title reveal">Everything you need, <span>nothing you don't</span></h2>
+
+    <div class="features-tabs reveal">
+      <button class="ftab active" onclick="showTab('formula')">Formula Engine</button>
+      <button class="ftab" onclick="showTab('macro')">Macro Recorder</button>
+      <button class="ftab" onclick="showTab('plot')">Plot Builder</button>
+      <button class="ftab" onclick="showTab('plugin')">Plugin System</button>
+      <button class="ftab" onclick="showTab('diff')">Sheet Compare</button>
+    </div>
+
+    <div class="feature-panels">
+
+      <div class="fpanel active" id="tab-formula">
+        <div class="fpanel-desc">
+          <h3>645 Functions</h3>
+          <p>The complete formula engine — SUM, VLOOKUP, INDEX/MATCH, COUNTIF, STDEV, and 640 more. Type = in any cell. Yellow = valid, red = error.</p>
+          <ul class="fpanel-list">
+            <li>Math, statistics, logic, lookup, text, date</li>
+            <li>Searchable formula browser with usage templates</li>
+            <li>Auto-calculate or manual recalculate mode</li>
+            <li>Formulas survive autofill — relative refs adjust correctly</li>
+            <li>Mixed absolute/relative references ($A$1 syntax)</li>
+          </ul>
+        </div>
+        <div class="fpanel-visual">
+          <div class="code-line"><span class="ln">B4</span><span class="kw">=</span><span class="fn">VLOOKUP</span><span>(A4, $Ref.$A:$D, 3, 0)</span></div>
+          <div class="code-line"><span class="ln">C4</span><span class="kw">=</span><span class="fn">IF</span>(<span class="fn">B4</span><span class="kw">&gt;</span><span class="st">300</span>, <span class="st">"HIGH"</span>, <span class="st">"OK"</span>)</div>
+          <div class="code-line"><span class="ln">D4</span><span class="kw">=</span><span class="fn">IFERROR</span>(<span class="fn">INDEX</span>($Ref.$B:$B,<span class="fn">MATCH</span>(A4,$Ref.$A:$A,0)),<span class="st">""</span>)</div>
+          <div class="code-line"><span class="ln">E4</span><span class="kw">=</span><span class="fn">SUMIF</span>($A:$A, A4, $C:$C)</div>
+          <div class="code-line"><span class="ln">F4</span><span class="kw">=</span><span class="fn">STDEV</span>(<span class="va">C2:C847</span>)</div>
+          <div class="code-line"><span class="ln"></span><span class="cm"># 645 functions total</span></div>
+        </div>
+      </div>
+
+      <div class="fpanel" id="tab-macro">
+        <div class="fpanel-desc">
+          <h3>Notepad++ Macros</h3>
+          <p>Records every action — not just menu clicks. Arrow keys, typed values, paste, delete. Navigation is relative, so running the macro 100 times processes 100 rows.</p>
+          <ul class="fpanel-list">
+            <li>F9 to start/stop · F10 to quick-play</li>
+            <li>Relative cursor: each repeat starts where previous ended</li>
+            <li>Captures formulas as formulas, not evaluated values</li>
+            <li>JSON step format — editable by hand</li>
+            <li>Run N times dialog with live step preview</li>
+          </ul>
+        </div>
+        <div class="fpanel-visual">
+          <div class="code-line"><span class="ln">1</span><span class="kw">move_rel</span>  dr=1, dc=0</div>
+          <div class="code-line"><span class="ln">2</span><span class="kw">type_value</span> <span class="st">"PROCESSED"</span></div>
+          <div class="code-line"><span class="ln">3</span><span class="kw">move_rel</span>  dr=0, dc=3</div>
+          <div class="code-line"><span class="ln">4</span><span class="kw">paste_here</span> 1×1 block</div>
+          <div class="code-line"><span class="ln">5</span><span class="kw">op</span>        <span class="fn">clean_whitespace</span> [2 Δ]</div>
+          <div class="code-line"><span class="ln"></span><span class="cm"># Run 200× → processes 200 rows</span></div>
+        </div>
+      </div>
+
+      <div class="fpanel" id="tab-plot">
+        <div class="fpanel-desc">
+          <h3>2D & 3D Charts</h3>
+          <p>Full matplotlib embedded in the app. Configure columns on the left, see the chart on the right. Overlay multiple sheets on the same axes.</p>
+          <ul class="fpanel-list">
+            <li>2D: Scatter, Line, Bar, Histogram, Heatmap, Pie, Polar, Box/Violin</li>
+            <li>3D: Scatter+colour, Surface, Plane Fit (Z=aX+bY+c), Line, Bar</li>
+            <li>Overlay any two open sheets for comparison</li>
+            <li>Save PNG / PDF / SVG / JPEG</li>
+            <li>Full navigation toolbar — pan, zoom, reset</li>
+          </ul>
+        </div>
+        <div class="fpanel-visual" style="text-align:center; padding:40px 24px;">
+          <div style="font-family:var(--font-mono);font-size:11px;color:var(--grey2);margin-bottom:16px;">3D Plane Fit: Z = 0.23·X + 1.14·Y + 48.2</div>
+          <div style="display:inline-block;position:relative;">
+            <svg width="200" height="140" viewBox="0 0 200 140">
+              <!-- Plane surface -->
+              <polygon points="20,110 100,80 180,100 100,130" fill="rgba(0,168,150,0.15)" stroke="rgba(0,212,200,0.4)" stroke-width="1"/>
+              <!-- Grid lines on plane -->
+              <line x1="20" y1="110" x2="180" y2="100" stroke="rgba(0,212,200,0.15)" stroke-width="0.5"/>
+              <line x1="100" y1="80" x2="100" y2="130" stroke="rgba(0,212,200,0.15)" stroke-width="0.5"/>
+              <!-- Scatter points -->
+              <circle cx="60" cy="95" r="3" fill="#E74C3C" opacity=".8"/>
+              <circle cx="80" cy="70" r="3" fill="#E74C3C" opacity=".8"/>
+              <circle cx="120" cy="88" r="3" fill="#E74C3C" opacity=".8"/>
+              <circle cx="140" cy="75" r="3" fill="#E74C3C" opacity=".8"/>
+              <circle cx="90" cy="110" r="3" fill="#E74C3C" opacity=".8"/>
+              <circle cx="160" cy="92" r="3" fill="#E74C3C" opacity=".8"/>
+              <circle cx="50" cy="115" r="3" fill="#E74C3C" opacity=".8"/>
+              <circle cx="130" cy="60" r="3" fill="#F7C47E" opacity=".8"/>
+              <!-- Vertical lines from points to plane -->
+              <line x1="130" y1="60" x2="130" y2="88" stroke="#F7C47E" stroke-width="0.8" stroke-dasharray="2,2"/>
+            </svg>
+            <div style="font-size:10px;color:var(--grey2);font-family:var(--font-mono);">● data  ■ fit plane  ● outlier</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="fpanel" id="tab-plugin">
+        <div class="fpanel-desc">
+          <h3>Python Plugins</h3>
+          <p>Write a decorated Python function. Save the file. Click Reload Plugins. It appears in the menu. No restart. Full pandas and numpy access.</p>
+          <ul class="fpanel-list">
+            <li>Return a DataFrame → replaces the sheet (goes to undo stack)</li>
+            <li>Return None → side-effects only (export, notify)</li>
+            <li>Access any open tab via app.workbook_sheets</li>
+            <li>Open dialogs, write files, call external APIs</li>
+            <li>Works with the macro recorder — @recordable decorator</li>
+          </ul>
+        </div>
+        <div class="fpanel-visual">
+          <div class="code-line"><span class="ln">1</span><span class="cm"># user_plugins.py</span></div>
+          <div class="code-line"><span class="ln">2</span></div>
+          <div class="code-line"><span class="ln">3</span><span class="kw">@</span><span class="fn">register</span>(<span class="st">"Flag: Load &gt; 300 kN"</span>)</div>
+          <div class="code-line"><span class="ln">4</span><span class="kw">def</span> <span class="fn">flag_high</span>(<span class="va">df</span>, <span class="va">app</span>):</div>
+          <div class="code-line"><span class="ln">5</span>  result = df.copy()</div>
+          <div class="code-line"><span class="ln">6</span>  load = pd.to_numeric(</div>
+          <div class="code-line"><span class="ln">7</span>    result[<span class="st">"Load_kN"</span>], errors=<span class="st">"coerce"</span>)</div>
+          <div class="code-line"><span class="ln">8</span>  result[<span class="st">"Flag"</span>] = load.gt(<span class="st">300</span>)</div>
+          <div class="code-line"><span class="ln">9</span>  <span class="kw">return</span> result</div>
+        </div>
+      </div>
+
+      <div class="fpanel" id="tab-diff">
+        <div class="fpanel-desc">
+          <h3>Sheet Compare</h3>
+          <p>Compare any two open sheets — before and after versions, baseline vs updated, two export files from different simulation runs.</p>
+          <ul class="fpanel-list">
+            <li>Key-column alignment (rows may be reordered)</li>
+            <li>Positional alignment (same row order)</li>
+            <li>Yellow = changed · Green = added · Red = removed</li>
+            <li>Summary: X changed | Y added | Z removed | N same</li>
+            <li>Export coloured Excel for review handoff</li>
+          </ul>
+        </div>
+        <div class="fpanel-visual">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:10px;">
+            <div>
+              <div style="color:var(--grey2);margin-bottom:6px;font-size:9px;letter-spacing:.06em;">BASELINE</div>
+              <div style="padding:4px 6px;border-left:2px solid var(--grey2);margin-bottom:2px;color:#A0BCD0;">MB_001 · 250.5 · OK</div>
+              <div style="padding:4px 6px;border-left:2px solid #E74C3C;background:rgba(231,76,60,.1);margin-bottom:2px;color:#F78FA0;">BRG_001 · 320.0 · OK</div>
+              <div style="padding:4px 6px;border-left:2px solid var(--grey2);margin-bottom:2px;color:#A0BCD0;">HUB_001 · 92.0 · OK</div>
+              <div style="padding:4px 6px;border-left:2px solid #E74C3C;background:rgba(231,76,60,.08);margin-bottom:2px;color:#F78FA0;">HUB_002 · 88.0 · OK</div>
+            </div>
+            <div>
+              <div style="color:var(--grey2);margin-bottom:6px;font-size:9px;letter-spacing:.06em;">MODIFIED</div>
+              <div style="padding:4px 6px;border-left:2px solid var(--grey2);margin-bottom:2px;color:#A0BCD0;">MB_001 · 250.5 · OK</div>
+              <div style="padding:4px 6px;border-left:2px solid #F7C47E;background:rgba(247,196,126,.08);margin-bottom:2px;color:var(--amber);">BRG_001 · 340.0 · WARN</div>
+              <div style="padding:4px 6px;border-left:2px solid var(--grey2);margin-bottom:2px;color:#A0BCD0;">HUB_001 · 92.0 · OK</div>
+              <div style="padding:4px 6px;border-left:2px solid var(--green);background:rgba(126,216,154,.06);margin-bottom:2px;color:var(--green);">NEW_COMP · 120.0 · OK</div>
+            </div>
+          </div>
+          <div style="margin-top:12px;font-size:9px;color:var(--grey2);letter-spacing:.06em;">1 changed · 1 added · 1 removed · 2 same</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── COMPARE ──────────────────────────────────────────────────────────── -->
+<section class="compare" id="compare">
+  <div class="container">
+    <div class="section-label reveal">Comparison</div>
+    <h2 class="section-title reveal">GridPilot vs the <span>alternatives</span></h2>
+
+    <div class="compare-table reveal">
+      <div class="ct-head">
+        <div>Feature</div>
+        <div class="ours">GridPilot</div>
+        <div>Excel</div>
+        <div>Notepad++</div>
+      </div>
+
+      <div class="ct-row">
+        <div class="ct-cell feature">Opens 500k-row CSV instantly</div>
+        <div class="ct-cell ours"><span class="tick">✓</span></div>
+        <div class="ct-cell"><span class="cross">✗</span></div>
+        <div class="ct-cell"><span class="tick">✓</span></div>
+      </div>
+      <div class="ct-row">
+        <div class="ct-cell feature">Multi-file session (no file locking)</div>
+        <div class="ct-cell ours"><span class="tick">✓</span></div>
+        <div class="ct-cell"><span class="partial">Partial</span></div>
+        <div class="ct-cell"><span class="tick">✓</span></div>
+      </div>
+      <div class="ct-row">
+        <div class="ct-cell feature">Auto-detect custom separators</div>
+        <div class="ct-cell ours"><span class="tick">✓</span></div>
+        <div class="ct-cell"><span class="cross">✗</span></div>
+        <div class="ct-cell"><span class="cross">✗</span></div>
+      </div>
+      <div class="ct-row">
+        <div class="ct-cell feature">Edit while filtered (write-back)</div>
+        <div class="ct-cell ours"><span class="tick">✓</span></div>
+        <div class="ct-cell"><span class="tick">✓</span></div>
+        <div class="ct-cell"><span class="cross">✗</span></div>
+      </div>
+      <div class="ct-row">
+        <div class="ct-cell feature">Python plugin system</div>
+        <div class="ct-cell ours"><span class="tick">✓</span></div>
+        <div class="ct-cell"><span class="cross">✗</span></div>
+        <div class="ct-cell"><span class="tick">✓</span></div>
+      </div>
+      <div class="ct-row">
+        <div class="ct-cell feature">Relative-position macro recorder</div>
+        <div class="ct-cell ours"><span class="tick">✓</span></div>
+        <div class="ct-cell"><span class="partial">VBA only</span></div>
+        <div class="ct-cell"><span class="tick">✓</span></div>
+      </div>
+      <div class="ct-row">
+        <div class="ct-cell feature">3D plot + plane fit</div>
+        <div class="ct-cell ours"><span class="tick">✓</span></div>
+        <div class="ct-cell"><span class="cross">✗</span></div>
+        <div class="ct-cell"><span class="cross">✗</span></div>
+      </div>
+      <div class="ct-row">
+        <div class="ct-cell feature">Key-column sheet diff</div>
+        <div class="ct-cell ours"><span class="tick">✓</span></div>
+        <div class="ct-cell"><span class="cross">✗</span></div>
+        <div class="ct-cell"><span class="cross">✗</span></div>
+      </div>
+      <div class="ct-row">
+        <div class="ct-cell feature">Core features free forever</div>
+        <div class="ct-cell ours"><span class="tick">✓</span></div>
+        <div class="ct-cell"><span class="cross">✗</span></div>
+        <div class="ct-cell"><span class="tick">✓</span></div>
+      </div>
+      <div class="ct-row">
+        <div class="ct-cell feature">Price (full features)</div>
+        <div class="ct-cell ours" style="color:var(--teal);font-family:var(--font-mono);font-size:12px;">€79 / year</div>
+        <div class="ct-cell"><span style="font-family:var(--font-mono);font-size:12px;color:var(--grey);">€99+/year</span></div>
+        <div class="ct-cell"><span style="color:var(--green);font-family:var(--font-mono);font-size:12px;">Free</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── PRICING ──────────────────────────────────────────────────────────── -->
+<section class="pricing" id="pricing">
+  <div class="container">
+    <div class="section-label reveal">Pricing</div>
+    <h2 class="section-title reveal">Simple, <span>honest</span> pricing</h2>
+    <p class="section-desc reveal">No seats that expire without warning. No hidden enterprise fees. Core features free forever.</p>
+
+    <div class="pricing-grid reveal">
+
+      <div class="price-card">
+        <div class="price-edition">Free</div>
+        <div class="price-amount"><span class="curr">€</span>0</div>
+        <div class="price-period">forever</div>
+        <div class="price-divider"></div>
+        <ul class="price-features">
+          <li><span class="icon">✓</span> Open / save any CSV, TSV, Excel</li>
+          <li><span class="icon">✓</span> Multi-file session, unlimited tabs</li>
+          <li><span class="icon">✓</span> Basic formulas (SUM, IF, AVERAGE…)</li>
+          <li><span class="icon">✓</span> Live row filter with write-back</li>
+          <li><span class="icon">✓</span> Split view, dark mode</li>
+          <li><span class="icon">✓</span> Basic scatter & line plots</li>
+          <li class="locked"><span class="icon">✗</span> Macro recorder</li>
+          <li class="locked"><span class="icon">✗</span> Pivot table & Sheet diff</li>
+          <li class="locked"><span class="icon">✗</span> 3D plots & Plugin system</li>
+        </ul>
+        <a href="#" class="btn-price outline">Download Free</a>
+      </div>
+
+      <div class="price-card featured">
+        <div class="price-edition">Single</div>
+        <div class="price-amount"><span class="curr">€</span>79</div>
+        <div class="price-period">per year · one machine</div>
+        <div class="price-divider"></div>
+        <ul class="price-features">
+          <li><span class="icon">✓</span> Everything in Free</li>
+          <li><span class="icon">✓</span> Macro recorder (F9/F10)</li>
+          <li><span class="icon">✓</span> Conditional formatting (14 rules)</li>
+          <li><span class="icon">✓</span> Pivot table builder</li>
+          <li><span class="icon">✓</span> Sheet diff (key-column aligned)</li>
+          <li><span class="icon">✓</span> 3D plots + plane fit</li>
+          <li><span class="icon">✓</span> Python plugin system</li>
+          <li><span class="icon">✓</span> Column inspector + transforms</li>
+          <li><span class="icon">✓</span> Excel-style fill handle</li>
+        </ul>
+        <a href="#" class="btn-price primary">Buy Single — €79</a>
+      </div>
+
+      <div class="price-card">
+        <div class="price-edition">Team</div>
+        <div class="price-amount"><span class="curr">€</span>399</div>
+        <div class="price-period">per year · 5 seats</div>
+        <div class="price-divider"></div>
+        <ul class="price-features">
+          <li><span class="icon">✓</span> Everything in Single</li>
+          <li><span class="icon">✓</span> 5 machine licences</li>
+          <li><span class="icon">✓</span> Shared macro library</li>
+          <li><span class="icon">✓</span> Priority email support</li>
+          <li><span class="icon">✓</span> Invoice & company billing</li>
+          <li><span class="icon">✓</span> Licence management portal</li>
+          <li style="color:var(--grey2);font-size:12px;margin-top:8px;">Need more? Contact for Enterprise.</li>
+        </ul>
+        <a href="mailto:hello@gridpilot.app" class="btn-price outline">Contact for Team</a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── TESTIMONIALS ─────────────────────────────────────────────────────── -->
+<section class="testimonials">
+  <div class="container">
+    <div class="section-label reveal">From engineers</div>
+    <h2 class="section-title reveal">What <span>real users</span> say</h2>
+
+    <div class="testi-grid reveal">
+      <div class="testi-card">
+        <div class="testi-quote">"</div>
+        <p class="testi-text">I process FEA result files every day. GridPilot opens in under a second, I can compare baseline vs updated in one click, and the macro recorder saves me 30 minutes per report.</p>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:rgba(0,212,200,.15);color:var(--teal);">PK</div>
+          <div>
+            <div class="testi-name">P. Kumar</div>
+            <div class="testi-role">Structural Engineer, Wind Energy</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testi-card">
+        <div class="testi-quote">"</div>
+        <p class="testi-text">The plugin system is what sold me. I wrote a 10-line function that validates our MDT naming convention. Runs in milliseconds across 5,000 components.</p>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:rgba(46,117,182,.15);color:#7EB8F7;">MH</div>
+          <div>
+            <div class="testi-name">M. Hansen</div>
+            <div class="testi-role">CAE Analyst, Automotive</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testi-card">
+        <div class="testi-quote">"</div>
+        <p class="testi-text">Finally a tool that understands pipe-separated and space-separated files without me having to configure anything every time. The filter write-back is genuinely brilliant.</p>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:rgba(126,216,154,.12);color:var(--green);">SR</div>
+          <div>
+            <div class="testi-name">S. Rao</div>
+            <div class="testi-role">Data Engineer, Aerospace</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ──────────────────────────────────────────────────────────────── -->
+<section class="cta-banner">
+  <div class="container">
+    <h2>Start in <span style="color:var(--teal)">30 seconds.</span></h2>
+    <p>Download. Open a file. No account, no setup, no waiting for Excel.</p>
+    <div class="cta-actions">
+      <a href="#" class="btn-primary">⬇ Download Free — Windows</a>
+      <a href="mailto:hello@gridpilot.app" class="btn-secondary" style="color:var(--grey);">Contact for Team licence →</a>
+    </div>
+    <p style="margin-top:20px;font-size:12px;color:var(--grey2);font-family:var(--font-mono);">
+      Windows 10/11 · Python 3.10+ · macOS & Linux: build from source
+    </p>
+  </div>
+</section>
+
+<!-- ── FOOTER ───────────────────────────────────────────────────────────── -->
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <div class="nav-logo" style="margin-bottom:12px;">
+          <div class="gp-mark">
+            <div class="cell g"></div><div class="cell g"></div><div class="cell g"></div><div class="cell pp"></div><div class="cell pp"></div>
+            <div class="cell g"></div><div class="cell"></div><div class="cell"></div><div class="cell pp"></div><div class="cell pp"></div>
+            <div class="cell g"></div><div class="cell"></div><div class="cell g"></div><div class="cell pp"></div><div class="cell pp"></div>
+            <div class="cell g"></div><div class="cell"></div><div class="cell g"></div><div class="cell pp"></div><div class="cell"></div>
+            <div class="cell g"></div><div class="cell g"></div><div class="cell g"></div><div class="cell pp"></div><div class="cell"></div>
+          </div>
+          GridPilot
+        </div>
+        <p>The CSV editor built for engineers. Opens fast, edits smart, never loses your data.</p>
+      </div>
+
+      <div class="footer-col">
+        <h4>Product</h4>
+        <ul>
+          <li><a href="#features">Features</a></li>
+          <li><a href="#pricing">Pricing</a></li>
+          <li><a href="#compare">Compare</a></li>
+          <li><a href="#">Changelog</a></li>
+          <li><a href="#">Roadmap</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Resources</h4>
+        <ul>
+          <li><a href="#">Documentation</a></li>
+          <li><a href="#">User Guide</a></li>
+          <li><a href="#">Plugin Examples</a></li>
+          <li><a href="#">GitHub</a></li>
+          <li><a href="#">Release Notes</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Support</h4>
+        <ul>
+          <li><a href="mailto:hello@gridpilot.app">hello@gridpilot.app</a></li>
+          <li><a href="#">Bug Reports</a></li>
+          <li><a href="#">Feature Requests</a></li>
+          <li><a href="#">Licence Help</a></li>
+          <li><a href="#">Privacy Policy</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span>© 2025 GridPilot. Built with Python, pandas, and tksheet.</span>
+      <span>gridpilot.app</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ── JS ───────────────────────────────────────────────────────────────── -->
+<script>
+// Feature tabs
+function showTab(id) {
+  document.querySelectorAll('.fpanel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.ftab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// Scroll reveal
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((entry, i) => {
+    if (entry.isIntersecting) {
+      setTimeout(() => entry.target.classList.add('visible'), i * 80);
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// Nav active state on scroll
+const sections = document.querySelectorAll('section[id]');
+window.addEventListener('scroll', () => {
+  const y = window.scrollY + 80;
+  sections.forEach(s => {
+    const top = s.offsetTop, bot = top + s.offsetHeight;
+    const link = document.querySelector(`nav a[href="#${s.id}"]`);
+    if (link) link.style.color = (y >= top && y < bot) ? 'var(--teal)' : '';
+  });
+});
+</script>
+</body>
+</html>
