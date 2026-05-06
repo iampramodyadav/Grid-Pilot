@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Documentation — GridPilot</title>
+<meta name="description" content="GridPilot user guide and developer reference documentation.">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#07111D;--navy2:#0D1B2A;--navy3:#162435;
+  --panel:#0A1520;--teal:#00D4C8;--teal2:#00A896;
+  --blue:#2E75B6;--white:#F0F4F8;--grey:#8BA3B8;
+  --grey2:#3A5A6A;--red:#E74C3C;--amber:#F7C47E;--green:#7ED89A;
+  --font-mono:'Space Mono',monospace;
+  --font-body:'DM Sans',sans-serif;
+  --font-display:'Bebas Neue',sans-serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--navy);color:var(--white);font-family:var(--font-body);font-size:16px;line-height:1.6}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,212,200,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,200,.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+a{color:var(--teal);text-decoration:none}
+a:hover{color:var(--white)}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(7,17,29,.92);backdrop-filter:blur(12px);border-bottom:1px solid rgba(0,212,200,.12)}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;height:60px;max-width:1200px;margin:0 auto;padding:0 24px}
+.nav-logo{display:flex;align-items:center;gap:10px;font-family:var(--font-mono);font-weight:700;font-size:18px;color:var(--white)}
+.nav-links{display:flex;align-items:center;gap:28px;list-style:none}
+.nav-links a{font-size:14px;color:var(--grey);font-weight:500;transition:color .2s}
+.nav-links a:hover,.nav-links a.active{color:var(--teal)}
+.gp-mark{display:grid;grid-template-columns:repeat(5,8px);grid-template-rows:repeat(5,8px);gap:1px}
+.gp-mark .cell{border-radius:1px;background:#162435}
+.gp-mark .g{background:#1A6080}
+.gp-mark .pp{background:var(--teal)}
+
+/* DOCS LAYOUT */
+.docs-layout{display:grid;grid-template-columns:260px 1fr;min-height:100vh;padding-top:60px;max-width:1200px;margin:0 auto;position:relative;z-index:1}
+
+/* SIDEBAR */
+.docs-sidebar{position:sticky;top:60px;height:calc(100vh - 60px);overflow-y:auto;padding:32px 0 32px 24px;border-right:1px solid rgba(255,255,255,.06);scrollbar-width:thin;scrollbar-color:var(--grey2) transparent}
+.docs-sidebar::-webkit-scrollbar{width:4px}
+.docs-sidebar::-webkit-scrollbar-thumb{background:var(--grey2);border-radius:2px}
+
+.sidebar-search{margin-bottom:24px;padding-right:24px}
+.sidebar-search input{width:100%;background:var(--navy3);border:1px solid rgba(255,255,255,.08);border-radius:4px;padding:8px 12px;font-family:var(--font-mono);font-size:12px;color:var(--white);outline:none;transition:border-color .2s}
+.sidebar-search input::placeholder{color:var(--grey2)}
+.sidebar-search input:focus{border-color:rgba(0,212,200,.3)}
+
+.sidebar-section{margin-bottom:28px}
+.sidebar-section-title{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;color:var(--grey2);text-transform:uppercase;padding:0 24px 8px 0;margin-bottom:4px}
+.sidebar-links{list-style:none;display:flex;flex-direction:column;gap:1px}
+.sidebar-links a{display:block;font-size:13px;color:var(--grey);padding:6px 24px 6px 12px;border-left:2px solid transparent;border-radius:0 3px 3px 0;transition:all .15s}
+.sidebar-links a:hover{color:var(--white);background:rgba(255,255,255,.03);border-left-color:var(--grey2)}
+.sidebar-links a.active{color:var(--teal);background:rgba(0,212,200,.06);border-left-color:var(--teal)}
+.sidebar-links a .badge-pro{font-family:var(--font-mono);font-size:8px;letter-spacing:.06em;padding:1px 5px;background:rgba(0,212,200,.15);color:var(--teal);border-radius:2px;margin-left:6px;vertical-align:middle}
+
+/* MAIN CONTENT */
+.docs-main{padding:48px 48px 80px;min-width:0}
+
+/* PAGE HERO */
+.doc-hero{margin-bottom:48px;padding-bottom:32px;border-bottom:1px solid rgba(255,255,255,.06)}
+.doc-tag{font-family:var(--font-mono);font-size:11px;color:var(--teal);letter-spacing:.14em;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.doc-tag::before{content:'';width:20px;height:1px;background:var(--teal)}
+.doc-hero h1{font-family:var(--font-display);font-size:clamp(42px,5vw,64px);letter-spacing:.02em;margin-bottom:16px}
+.doc-hero h1 span{color:var(--teal)}
+.doc-hero p{font-size:17px;color:var(--grey);max-width:560px;line-height:1.7;margin-bottom:24px}
+.doc-version{font-family:var(--font-mono);font-size:11px;color:var(--grey2);display:flex;align-items:center;gap:16px}
+.doc-version span{background:var(--navy3);border:1px solid rgba(255,255,255,.08);padding:4px 10px;border-radius:3px}
+
+/* PLACEHOLDER CONTENT */
+.placeholder-notice{background:rgba(0,212,200,.06);border:1px solid rgba(0,212,200,.2);border-radius:6px;padding:24px 28px;margin-bottom:40px}
+.placeholder-notice h3{font-family:var(--font-mono);font-size:13px;color:var(--teal);letter-spacing:.06em;margin-bottom:8px;display:flex;align-items:center;gap:10px}
+.placeholder-notice h3::before{content:'ℹ';font-style:normal}
+.placeholder-notice p{font-size:14px;color:#A0BCD0;line-height:1.6}
+.placeholder-notice a{color:var(--teal)}
+
+/* QUICK START CARDS */
+.quickstart-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:48px}
+.qs-card{background:var(--navy2);border:1px solid rgba(255,255,255,.06);border-radius:6px;padding:24px;transition:all .25s;cursor:pointer}
+.qs-card:hover{border-color:rgba(0,212,200,.2);background:var(--navy3);transform:translateY(-2px)}
+.qs-icon{font-size:24px;margin-bottom:12px}
+.qs-card h3{font-family:var(--font-mono);font-size:12px;color:var(--white);letter-spacing:.04em;margin-bottom:8px;text-transform:uppercase}
+.qs-card p{font-size:13px;color:var(--grey);line-height:1.5}
+.qs-card .qs-link{font-family:var(--font-mono);font-size:11px;color:var(--teal);margin-top:12px;display:block}
+
+/* TOC */
+.toc{background:var(--panel);border:1px solid rgba(255,255,255,.06);border-radius:6px;padding:24px 28px;margin-bottom:40px}
+.toc h3{font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;color:var(--grey2);text-transform:uppercase;margin-bottom:16px}
+.toc ol{padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.toc ol li{font-size:14px;color:var(--grey)}
+.toc ol li a{color:var(--grey);transition:color .15s}
+.toc ol li a:hover{color:var(--teal)}
+
+/* CHAPTER CARDS */
+.chapter-list{display:flex;flex-direction:column;gap:12px;margin-bottom:48px}
+.chapter-card{background:var(--navy2);border:1px solid rgba(255,255,255,.06);border-radius:6px;padding:20px 24px;display:flex;align-items:center;gap:20px;transition:all .2s;cursor:pointer}
+.chapter-card:hover{border-color:rgba(0,212,200,.2);background:var(--navy3)}
+.chapter-num{font-family:var(--font-display);font-size:28px;color:rgba(0,212,200,.3);min-width:36px;line-height:1}
+.chapter-info{flex:1;min-width:0}
+.chapter-info h4{font-size:15px;font-weight:600;color:var(--white);margin-bottom:4px}
+.chapter-info p{font-size:13px;color:var(--grey);line-height:1.4}
+.chapter-info .tags{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.chapter-info .tag{font-family:var(--font-mono);font-size:9px;padding:2px 7px;border-radius:2px;letter-spacing:.06em}
+.tag-free{background:rgba(126,216,154,.1);color:var(--green);border:1px solid rgba(126,216,154,.2)}
+.tag-pro{background:rgba(0,212,200,.1);color:var(--teal);border:1px solid rgba(0,212,200,.2)}
+.tag-dev{background:rgba(176,126,247,.1);color:#B07EF7;border:1px solid rgba(176,126,247,.2)}
+.chapter-arrow{color:var(--grey2);font-family:var(--font-mono);font-size:16px;transition:color .2s}
+.chapter-card:hover .chapter-arrow{color:var(--teal)}
+
+/* SHORTCUTS TABLE */
+.shortcuts-table{width:100%;border-collapse:collapse;margin-bottom:48px}
+.shortcuts-table th{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;color:var(--grey2);text-transform:uppercase;padding:10px 16px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08);background:#060E16}
+.shortcuts-table td{padding:10px 16px;font-size:14px;color:var(--grey);border-bottom:1px solid rgba(255,255,255,.04)}
+.shortcuts-table tr:hover td{background:rgba(0,212,200,.03)}
+.shortcuts-table td:first-child{color:var(--white);font-weight:500}
+.shortcuts-table td:last-child{font-family:var(--font-mono);font-size:12px}
+kbd{background:var(--navy3);border:1px solid rgba(255,255,255,.1);border-bottom:2px solid rgba(0,212,200,.3);border-radius:3px;padding:2px 7px;font-family:var(--font-mono);font-size:11px;color:var(--teal)}
+
+/* SECTION HEADERS in content */
+.content-section{margin-bottom:48px}
+.content-section h2{font-family:var(--font-display);font-size:32px;letter-spacing:.02em;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid rgba(0,212,200,.15)}
+.content-section h2 span{color:var(--teal)}
+.content-section p{font-size:15px;color:var(--grey);line-height:1.7;margin-bottom:12px}
+.content-section p strong{color:var(--white);font-weight:500}
+
+/* DOWNLOAD BUTTONS */
+.download-section{background:var(--navy2);border:1px solid rgba(0,212,200,.15);border-radius:8px;padding:32px;margin-bottom:48px;text-align:center}
+.download-section h3{font-family:var(--font-display);font-size:28px;margin-bottom:8px}
+.download-section p{font-size:14px;color:var(--grey);margin-bottom:24px}
+.dl-buttons{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
+.dl-btn{display:inline-flex;align-items:center;gap:10px;padding:12px 24px;border-radius:4px;font-family:var(--font-mono);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;transition:all .2s;cursor:pointer;border:none}
+.dl-btn.primary{background:var(--teal);color:var(--navy)}
+.dl-btn.primary:hover{background:var(--white);transform:translateY(-1px)}
+.dl-btn.outline{background:transparent;color:var(--grey);border:1px solid rgba(255,255,255,.12)}
+.dl-btn.outline:hover{border-color:var(--teal);color:var(--teal)}
+.dl-note{font-family:var(--font-mono);font-size:11px;color:var(--grey2);margin-top:16px}
+
+/* REQUIREMENTS */
+.req-table{width:100%;border-collapse:collapse;margin-bottom:24px}
+.req-table th{font-family:var(--font-mono);font-size:10px;color:var(--grey2);text-transform:uppercase;letter-spacing:.08em;padding:8px 14px;text-align:left;background:#060E16;border-bottom:1px solid rgba(255,255,255,.08)}
+.req-table td{padding:9px 14px;font-size:13px;color:var(--grey);border-bottom:1px solid rgba(255,255,255,.04);font-family:var(--font-mono)}
+.req-table td:first-child{color:var(--white)}
+.req-table tr:hover td{background:rgba(0,212,200,.03)}
+
+/* FOOTER */
+footer{border-top:1px solid rgba(255,255,255,.06);padding:32px 0;margin-left:260px}
+.footer-inner{max-width:1200px;margin:0 auto;padding:0 48px;display:flex;justify-content:space-between;align-items:center;flex-wrap:gap;gap:12px}
+.footer-links{display:flex;gap:24px;flex-wrap:wrap}
+.footer-links a{font-family:var(--font-mono);font-size:11px;color:var(--grey2);transition:color .2s}
+.footer-links a:hover{color:var(--teal)}
+.footer-copy{font-family:var(--font-mono);font-size:11px;color:var(--grey2)}
+
+@media(max-width:860px){
+  .docs-layout{grid-template-columns:1fr}
+  .docs-sidebar{display:none}
+  .quickstart-grid{grid-template-columns:1fr 1fr}
+  footer{margin-left:0}
+  .nav-links{display:none}
+}
+@media(max-width:560px){
+  .quickstart-grid{grid-template-columns:1fr}
+  .docs-main{padding:32px 20px 60px}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="/" class="nav-logo">
+      <div class="gp-mark">
+        <div class="cell g"></div><div class="cell g"></div><div class="cell g"></div><div class="cell pp"></div><div class="cell pp"></div>
+        <div class="cell g"></div><div class="cell"></div><div class="cell"></div><div class="cell pp"></div><div class="cell pp"></div>
+        <div class="cell g"></div><div class="cell"></div><div class="cell g"></div><div class="cell pp"></div><div class="cell pp"></div>
+        <div class="cell g"></div><div class="cell"></div><div class="cell g"></div><div class="cell pp"></div><div class="cell"></div>
+        <div class="cell g"></div><div class="cell g"></div><div class="cell g"></div><div class="cell pp"></div><div class="cell"></div>
+      </div>
+      GridPilot
+    </a>
+    <ul class="nav-links">
+      <li><a href="/#why">Why</a></li>
+      <li><a href="/#features">Features</a></li>
+      <li><a href="/#pricing">Pricing</a></li>
+      <li><a href="/docs/" class="active">Docs</a></li>
+      <li><a href="/changelog/">Changelog</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="docs-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="docs-sidebar">
+    <div class="sidebar-search">
+      <input type="text" placeholder="Search docs..." oninput="searchDocs(this.value)">
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Getting Started</div>
+      <ul class="sidebar-links">
+        <li><a href="#install" class="active">Installation</a></li>
+        <li><a href="#first-file">Opening your first file</a></li>
+        <li><a href="#interface">Interface overview</a></li>
+        <li><a href="#shortcuts">Keyboard shortcuts</a></li>
+      </ul>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Core Features</div>
+      <ul class="sidebar-links">
+        <li><a href="#editing">Editing data</a></li>
+        <li><a href="#autofill">Autofill &amp; fill handle <span class="badge-pro">Pro</span></a></li>
+        <li><a href="#filter">Row filter bar</a></li>
+        <li><a href="#formulas">Formula engine</a></li>
+        <li><a href="#cf">Conditional formatting <span class="badge-pro">Pro</span></a></li>
+        <li><a href="#find-replace">Find &amp; Replace</a></li>
+      </ul>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Analysis</div>
+      <ul class="sidebar-links">
+        <li><a href="#pivot">Pivot table <span class="badge-pro">Pro</span></a></li>
+        <li><a href="#diff">Sheet compare <span class="badge-pro">Pro</span></a></li>
+        <li><a href="#inspector">Column inspector <span class="badge-pro">Pro</span></a></li>
+        <li><a href="#plots">Plot builder <span class="badge-pro">Pro</span></a></li>
+      </ul>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Automation</div>
+      <ul class="sidebar-links">
+        <li><a href="#macros">Macro recorder <span class="badge-pro">Pro</span></a></li>
+        <li><a href="#plugins">Plugin system <span class="badge-pro">Pro</span></a></li>
+      </ul>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Developer Reference</div>
+      <ul class="sidebar-links">
+        <li><a href="#dev-plugin">Writing plugins</a></li>
+        <li><a href="#dev-mixin">Writing a mixin</a></li>
+        <li><a href="#dev-game">Writing an arcade game</a></li>
+        <li><a href="#dev-api">Integration contract</a></li>
+        <li><a href="#dev-licence">Licence system</a></li>
+      </ul>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Other</div>
+      <ul class="sidebar-links">
+        <li><a href="#textview">Raw text viewer</a></li>
+        <li><a href="#colour-bookmarks">Colour bookmarks</a></li>
+        <li><a href="#arcade">Arcade games</a></li>
+        <li><a href="#drag-drop">Drag &amp; drop</a></li>
+        <li><a href="#deploy">Web deployment</a></li>
+        <li><a href="#troubleshoot">Troubleshooting</a></li>
+      </ul>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="docs-main">
+
+    <div class="doc-hero">
+      <div class="doc-tag">Documentation</div>
+      <h1>GridPilot <span>Docs</span></h1>
+      <p>User guide and developer reference for GridPilot v1.0. Start with installation, or jump straight to the feature you need from the sidebar.</p>
+      <div class="doc-version">
+        <span>v1.0.0</span>
+        <span>Python 3.10+</span>
+        <span>Windows · macOS · Linux</span>
+      </div>
+    </div>
+
+    <!-- PLACEHOLDER NOTICE -->
+    <div class="placeholder-notice">
+      <h3>Full documentation coming soon</h3>
+      <p>
+        The complete user guide is available as a Word document
+        (<a href="#">GridPilot_UserGuide.docx</a>) and will be converted
+        to full HTML shortly. In the meantime this page covers
+        installation, quick-start, and a complete chapter index.
+        For anything not covered here, email
+        <a href="mailto:hello@gridpilot.app">hello@gridpilot.app</a>.
+      </p>
+    </div>
+
+    <!-- QUICK START CARDS -->
+    <div class="quickstart-grid">
+      <div class="qs-card">
+        <div class="qs-icon">⬇</div>
+        <h3>Install</h3>
+        <p>Download the Windows installer or run from source with pip.</p>
+        <a class="qs-link" href="#install">Installation guide →</a>
+      </div>
+      <div class="qs-card">
+        <div class="qs-icon">📂</div>
+        <h3>Open a file</h3>
+        <p>Ctrl+O or drag a CSV onto the window. Separator is auto-detected.</p>
+        <a class="qs-link" href="#first-file">Quick start →</a>
+      </div>
+      <div class="qs-card">
+        <div class="qs-icon">🔌</div>
+        <h3>Write a plugin</h3>
+        <p>10 lines of Python. Appears in the Plugins menu instantly.</p>
+        <a class="qs-link" href="#dev-plugin">Plugin guide →</a>
+      </div>
+    </div>
+
+    <!-- INSTALLATION -->
+    <div class="content-section" id="install">
+      <h2>1. <span>Installation</span></h2>
+
+      <div class="download-section">
+        <h3>Download GridPilot</h3>
+        <p>Windows installer — no Python installation required</p>
+        <div class="dl-buttons">
+          <a href="#" class="dl-btn primary">⬇ GridPilot-Setup.exe &nbsp;·&nbsp; Windows 10/11</a>
+          <a href="https://github.com/yourusername/gridpilot" class="dl-btn outline">⎇ Source on GitHub</a>
+        </div>
+        <p class="dl-note">Version 1.0.0 &nbsp;·&nbsp; ~45 MB &nbsp;·&nbsp; SHA-256 checksum available on GitHub Releases</p>
+      </div>
+
+      <h2 style="font-size:20px;border:none;padding-bottom:0;margin-bottom:12px;margin-top:32px">Run from source</h2>
+      <p>Requires Python 3.10 or later.</p>
+      <div style="background:#060E16;border:1px solid rgba(0,212,200,.1);border-radius:6px;padding:20px 24px;margin:16px 0;font-family:var(--font-mono);font-size:13px;color:#A0BCD0;line-height:1.8">
+        <span style="color:var(--grey2)"># Clone the repository</span><br>
+        git clone https://github.com/yourusername/gridpilot.git<br>
+        cd gridpilot<br><br>
+        <span style="color:var(--grey2)"># Install dependencies</span><br>
+        pip install -r requirements.txt<br><br>
+        <span style="color:var(--grey2)"># Run</span><br>
+        python main_app.py
+      </div>
+
+      <h2 style="font-size:20px;border:none;padding-bottom:0;margin-bottom:12px;margin-top:32px">Requirements</h2>
+      <table class="req-table">
+        <tr><th>Package</th><th>Version</th><th>Purpose</th></tr>
+        <tr><td>Python</td><td>&gt;= 3.10</td><td>Runtime</td></tr>
+        <tr><td>ttkbootstrap</td><td>&gt;= 1.10</td><td>Themed UI widgets</td></tr>
+        <tr><td>tksheet</td><td>&gt;= 7.0</td><td>Spreadsheet grid</td></tr>
+        <tr><td>pandas</td><td>&gt;= 2.0</td><td>Data engine</td></tr>
+        <tr><td>matplotlib</td><td>&gt;= 3.7</td><td>Charts and plots</td></tr>
+        <tr><td>numpy</td><td>&gt;= 1.24</td><td>Numeric operations</td></tr>
+        <tr><td>openpyxl</td><td>&gt;= 3.1</td><td>Excel read/write</td></tr>
+        <tr><td>scipy</td><td>&gt;= 1.10</td><td>3D surface interpolation (optional)</td></tr>
+        <tr><td>tkinterdnd2</td><td>&gt;= 0.4</td><td>Drag-and-drop file open (optional)</td></tr>
+      </table>
+    </div>
+
+    <!-- CHAPTER INDEX -->
+    <div class="content-section" id="chapters">
+      <h2>Full <span>Chapter Index</span></h2>
+      <p>The complete user guide covers these chapters. Download the Word document for full content.</p>
+
+      <div class="chapter-list" style="margin-top:24px">
+        <div class="chapter-card"><div class="chapter-num">1</div><div class="chapter-info"><h4>Introduction</h4><p>Feature summary, use cases, what GridPilot is and isn't</p><div class="tags"><span class="tag tag-free">Free</span></div></div><span class="chapter-arrow">→</span></div>
+        <div class="chapter-card"><div class="chapter-num">2</div><div class="chapter-info"><h4>Getting Started</h4><p>Installation, opening files, interface overview</p><div class="tags"><span class="tag tag-free">Free</span></div></div><span class="chapter-arrow">→</span></div>
+        <div class="chapter-card"><div class="chapter-num">3</div><div class="chapter-info"><h4>Editing Data</h4><p>Cell editing, autofill patterns, find &amp; replace</p><div class="tags"><span class="tag tag-free">Free</span><span class="tag tag-pro">Pro: autofill drag</span></div></div><span class="chapter-arrow">→</span></div>
+        <div class="chapter-card"><div class="chapter-num">4</div><div class="chapter-info"><h4>Formula Engine</h4><p>645 functions, formula bar, formula browser, auto-calculate</p><div class="tags"><span class="tag tag-free">Free</span></div></div><span class="chapter-arrow">→</span></div>
+        <div class="chapter-card"><div class="chapter-num">5</div><div class="chapter-info"><h4>Filter, Pivot &amp; Compare</h4><p>Row filter modes, pivot table builder, sheet diff</p><div class="tags"><span class="tag tag-free">Filter: Free</span><span class="tag tag-pro">Pivot &amp; Diff: Pro</span></div></div><span class="chapter-arrow">→</span></div>
+        <div class="chapter-card"><div class="chapter-num">6</div><div class="chapter-info"><h4>Macro Recorder</h4><p>Recording, relative navigation, run N times, macro editor</p><div class="tags"><span class="tag tag-pro">Pro</span></div></div><span class="chapter-arrow">→</span></div>
+        <div class="chapter-card"><div class="chapter-num">7</div><div class="chapter-info"><h4>Plot Builder</h4><p>All 2D and 3D chart types, overlay, export</p><div class="tags"><span class="tag tag-free">Basic: Free</span><span class="tag tag-pro">3D: Pro</span></div></div><span class="chapter-arrow">→</span></div>
+        <div class="chapter-card"><div class="chapter-num">8</div><div class="chapter-info"><h4>Plugin System</h4><p>Setup, function contract, app object reference</p><div class="tags"><span class="tag tag-pro">Pro</span></div></div><span class="chapter-arrow">→</span></div>
+        <div class="chapter-card"><div class="chapter-num">9</div><div class="chapter-info"><h4>Developer Reference</h4><p>Plugin examples, @recordable decorator, writing mixins, integration contract, hooks</p><div class="tags"><span class="tag tag-dev">Developer</span></div></div><span class="chapter-arrow">→</span></div>
+        <div class="chapter-card"><div class="chapter-num">10</div><div class="chapter-info"><h4>Complete Shortcut Reference</h4><p>All keyboard shortcuts by category</p><div class="tags"><span class="tag tag-free">Free</span></div></div><span class="chapter-arrow">→</span></div>
+        <div class="chapter-card"><div class="chapter-num">11</div><div class="chapter-info"><h4>Troubleshooting</h4><p>Common problems and solutions</p><div class="tags"><span class="tag tag-free">Free</span></div></div><span class="chapter-arrow">→</span></div>
+      </div>
+    </div>
+
+    <!-- SHORTCUTS -->
+    <div class="content-section" id="shortcuts">
+      <h2>Keyboard <span>Shortcuts</span></h2>
+      <table class="shortcuts-table">
+        <tr><th>Action</th><th>Shortcut</th></tr>
+        <tr><td>Open file</td><td><kbd>Ctrl+O</kbd></td></tr>
+        <tr><td>Add file to session</td><td><kbd>Ctrl+Shift+O</kbd></td></tr>
+        <tr><td>Save (silent)</td><td><kbd>Ctrl+S</kbd></td></tr>
+        <tr><td>Save all tabs</td><td><kbd>Ctrl+Shift+S</kbd></td></tr>
+        <tr><td>Close tab</td><td><kbd>Ctrl+W</kbd></td></tr>
+        <tr><td>Undo / Redo</td><td><kbd>Ctrl+Z</kbd> / <kbd>Ctrl+Y</kbd></td></tr>
+        <tr><td>Find &amp; Replace (current)</td><td><kbd>Ctrl+H</kbd></td></tr>
+        <tr><td>Find &amp; Replace (all sheets)</td><td><kbd>Ctrl+Shift+H</kbd></td></tr>
+        <tr><td>Filter bar</td><td><kbd>Ctrl+F</kbd></td></tr>
+        <tr><td>Autofill selection</td><td><kbd>Ctrl+R</kbd></td></tr>
+        <tr><td>Command palette</td><td><kbd>Ctrl+P</kbd></td></tr>
+        <tr><td>Pivot table</td><td><kbd>Ctrl+Shift+P</kbd></td></tr>
+        <tr><td>Plot builder</td><td><kbd>Ctrl+Shift+L</kbd></td></tr>
+        <tr><td>Split view</td><td><kbd>Ctrl+Shift+V</kbd></td></tr>
+        <tr><td>Raw text view</td><td><kbd>Ctrl+T</kbd></td></tr>
+        <tr><td>Column inspector</td><td><kbd>Ctrl+I</kbd></td></tr>
+        <tr><td>Record macro</td><td><kbd>F9</kbd></td></tr>
+        <tr><td>Play last macro</td><td><kbd>F10</kbd></td></tr>
+        <tr><td>Next / Previous tab</td><td><kbd>Ctrl+Tab</kbd> / <kbd>Ctrl+Shift+Tab</kbd></td></tr>
+        <tr><td>Last data cell</td><td><kbd>Ctrl+End</kbd></td></tr>
+      </table>
+    </div>
+
+  </main>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-links">
+      <a href="/">Home</a>
+      <a href="/docs/">Documentation</a>
+      <a href="/changelog/">Changelog</a>
+      <a href="https://github.com/yourusername/gridpilot">GitHub</a>
+      <a href="mailto:hello@gridpilot.app">Contact</a>
+    </div>
+    <span class="footer-copy">© 2025 GridPilot</span>
+  </div>
+</footer>
+
+<script>
+// Sidebar active state on scroll
+const sections = document.querySelectorAll('[id]');
+const sideLinks = document.querySelectorAll('.sidebar-links a');
+
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(s => {
+    if (window.scrollY >= s.offsetTop - 100) current = s.id;
+  });
+  sideLinks.forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+  });
+});
+
+// Simple search filter
+function searchDocs(q) {
+  q = q.toLowerCase();
+  document.querySelectorAll('.sidebar-links li').forEach(li => {
+    const txt = li.textContent.toLowerCase();
+    li.style.display = (!q || txt.includes(q)) ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>
